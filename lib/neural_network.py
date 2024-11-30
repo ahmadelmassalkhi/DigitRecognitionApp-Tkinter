@@ -32,19 +32,8 @@ class NeuralNetwork:
         self.activationN = Softmax()
         self.Softmax_Loss = Softmax_CategoricalCrossEntropy()
 
-
-    def forward(self, X:list[Image.Image]|np.ndarray):
-        # filter parameters
-        if isinstance(X, list):
-            X = self.prepare_images(X).reshape(len(X), self.nbOfInputs)
-        elif isinstance(X, np.ndarray):
-            # matrix
-            if X.shape == self.image_dims: X = np.array([X]).reshape(1, self.nbOfInputs)
-            elif len(X.shape)!=2 or X.shape[-1]!=self.nbOfInputs:
-                raise ValueError(f'Unexpected type or shape of feature classes!')
-        else: 
-            raise ValueError(f'Unexpected type of features `{type(X)}` instead of Image|array !')
-        
+    ''' X: numpy array of shape (any, 28x28) '''
+    def forward(self, X):
         # propagate
         self.layer1.forward(X)
         self.activation1.forward(self.layer1.output)
@@ -58,27 +47,12 @@ class NeuralNetwork:
         self.output_confidence = np.max(self.activationN.output, axis=1)
         self.output = np.argmax(self.activationN.output, axis=1)
         return self.output
-    
 
     # performs full propagation until reaching a target-confidence
-    def learn(self, images:list[Image.Image]|np.ndarray, labels:list[int], target_confidence:float=0.99):
-        # filter parameters
-        if target_confidence<=0 or target_confidence>1:
-            raise ValueError(f'Target-Confidence must be within the range [0,1]!')
+    ''' images: numpy array of shape (any, 28x28) '''
+    def learn(self, images, labels:list[int], target_confidence:float=0.99):
         if len(images)!=len(labels):
             raise ValueError(f'Number of Features != Labels!')
-        if isinstance(images, list):
-            images = self.prepare_images(images).reshape(len(images), self.nbOfInputs)
-        elif isinstance(images, np.ndarray):
-            # matrix
-            if images.shape == self.image_dims: images = np.array([images]).reshape(1, self.nbOfInputs)
-            elif images.shape[1:] == self.image_dims:
-                images = np.array(images).reshape(len(images), self.nbOfInputs)
-            elif len(images.shape)!=2 or images.shape[-1]!=self.nbOfInputs:
-                raise ValueError(f'Unexpected type or shape of feature classes!')
-        else: 
-            raise ValueError(f'Unexpected type of features `{type(images)}` instead of Image|array !')
-
         # propagate
         confidence = i = 0
         while confidence < target_confidence:
@@ -127,11 +101,11 @@ class NeuralNetwork:
             images[i] = self.prepare_image(images[i])
         if len(images)==0: return np.empty((0, self.image_width, self.image_height))
         return np.array(images)
-    
-
-    def plot_image(self, image_matrix:np.ndarray, prediction:int):
-        # Plot the first image in the test set and its predicted label
-        plt.imshow(image_matrix, cmap=plt.cm.binary)
+        
+    def plot_image(self, image_matrix: np.ndarray, prediction: int):
+        # Plot the image with the 'gray' colormap (black is black, white is white)
+        plt.imshow(image_matrix, cmap='gray')
         plt.title(f"Predicted: {prediction}")
         plt.show()
+
         
