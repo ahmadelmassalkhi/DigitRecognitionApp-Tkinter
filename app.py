@@ -1,6 +1,5 @@
 from tkinter import Tk, Canvas, Button, Frame, BOTH, filedialog, CENTER, Label
 from PIL import Image, ImageDraw
-from lib.neural_network import NeuralNetwork
 import numpy as np
 import time
 
@@ -26,13 +25,13 @@ class WhiteboardApp:
         self.prediction_label.pack(side="top")
 
         # Create a canvas
-        self.canvas = Canvas(self.root, width=side_length, height=side_length, bg="black")  # Set canvas bg to black
+        self.canvas = Canvas(self.root, width=side_length, height=side_length, bg="#1F1F1F")  # Slight gray background
         self.canvas.pack(side="left", fill=BOTH, expand=False)
+        self.image = Image.new("RGB", (side_length, side_length), (31, 31, 31))  # Slight gray background
 
         # Prepare for drawing
         self.canvas.bind("<B1-Motion>", self.draw)
         self.canvas.bind("<ButtonRelease-1>", self.predict)
-        self.image = Image.new("RGB", (side_length, side_length), "black")  # Set canvas image bg to black
         self.draw_obj = ImageDraw.Draw(self.image)
 
         # Create a tab for buttons
@@ -47,18 +46,16 @@ class WhiteboardApp:
         self.save_button = Button(self.tab, text="Save", font=("Arial", 12, "bold"), command=self.save_canvas)
         self.save_button.place(relx=0.5, rely=0.2, anchor=CENTER)
 
-        # init network
-        self.nn = NeuralNetwork(model_path='model.pkl')
 
     def draw(self, event):
         x, y = event.x, event.y
-        r = 8  # Update brush size to 8
+        r = 9  # Update brush size to 8
         self.canvas.create_oval(x - r, y - r, x + r, y + r, fill="white", outline="white")  # Set pen color to white
         self.draw_obj.ellipse([x - r, y - r, x + r, y + r], fill="white", outline="white")  # Set pen color to white
 
     def clear_canvas(self):
         self.canvas.delete("all")
-        self.image = Image.new("RGB", (self.side_length, self.side_length), "black")  # Reset image bg to black
+        self.image = Image.new("RGB", (self.side_length, self.side_length), (31, 31, 31))  # Slight gray background
         self.draw_obj = ImageDraw.Draw(self.image)
 
     def save_canvas(self):
@@ -74,11 +71,8 @@ class WhiteboardApp:
         self.root.mainloop()
 
     def predict(self, event):
-        img_matrix = self.nn.prepare_image(self.image)
-        self.nn.forward(img_matrix.reshape(1, self.nn.nbOfInputs))
-        self.update_prediction(self.nn.output[0], self.nn.output_confidence[0])
-        # self.image.save(f'./{time.time()}.png')
-        self.clear_canvas()
+        self.image.save(f'{time.time()}.png')
+        pass
         
 # Initialize and run the app
 app = WhiteboardApp(400)  # Set side length of the drawing area
