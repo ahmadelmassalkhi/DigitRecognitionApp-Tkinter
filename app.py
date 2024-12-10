@@ -54,7 +54,7 @@ class WhiteboardApp:
 
     def clear_canvas(self):
         self.canvas.delete("all")
-        self.image = Image.new("RGB", (self.side_length, self.side_length), (31, 31, 31))  # Slight gray background
+        self.image = Image.new("RGB", (self.side_length, self.side_length), (0,0,0))  # Slight gray background
         self.draw_obj = ImageDraw.Draw(self.image)
 
     def save_canvas(self):
