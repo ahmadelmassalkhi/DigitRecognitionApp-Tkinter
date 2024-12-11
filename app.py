@@ -1,6 +1,8 @@
-from tkinter import Tk, Canvas, Button, Frame, BOTH, filedialog, CENTER, Label
-from PIL import Image, ImageDraw
 import time
+from PIL import Image, ImageDraw
+from tkinter import Tk, Canvas, Button, Frame, BOTH, filedialog, CENTER, Label
+from neural_network import NeuralNetwork
+from image_processor import ImageProcessor
 
 
 class WhiteboardApp:
@@ -51,6 +53,9 @@ class WhiteboardApp:
         self.correct_button = None
         self.wrong_button = None
         self.digit_buttons = []
+
+        # init network
+        self.nn = NeuralNetwork('model.keras')
 
     def draw(self, event):
         x, y = event.x, event.y
@@ -113,11 +118,10 @@ class WhiteboardApp:
         self.root.mainloop()
 
     def predict(self, event):
+        # self.image.save(f'{time.time()}.png')
+        predictions = self.nn.model.predict(ImageProcessor.matricize_images_to_mnist([self.image]))
+        self.update_prediction(predictions[0].argmax(), predictions[0].max())
         self.show_correction_buttons()
-        pass
-        # matrices = self.brain.matricize_images([self.image])
-        # predictions = self.brain.predict(matrices)
-        # self.update_prediction(predictions[0].argmax(), predictions[0].max())
 
 
 # Initialize and run the app
