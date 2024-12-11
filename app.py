@@ -57,6 +57,9 @@ class WhiteboardApp:
         # init network
         self.nn = NeuralNetwork('model.keras')
 
+    def run(self):
+        self.root.mainloop()
+
     def draw(self, event):
         x, y = event.x, event.y
         r = 15
@@ -67,7 +70,6 @@ class WhiteboardApp:
         self.canvas.delete("all")
         self.image = Image.new("RGB", (self.side_length, self.side_length), "black")
         self.draw_obj = ImageDraw.Draw(self.image)
-        self.remove_correction_buttons()
 
     def save_canvas(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG Files", "*.png")])
@@ -85,23 +87,12 @@ class WhiteboardApp:
         self.wrong_button = Button(self.tab, text="✘", font=("Arial", 18), fg="red", command=self.handle_wrong)
         self.wrong_button.place(relx=0.7, rely=0.4, anchor=CENTER)
 
-    def handle_correct(self):
-        self.clear_canvas()
-
-    def handle_wrong(self):
-        self.remove_correction_buttons()
-        self.show_digit_buttons()
-
     def show_digit_buttons(self):
         # Create buttons for digits 0-9 in a single column with more margin between them
         for i in range(10):
             btn = Button(self.tab, text=str(i), font=("Arial", 12, "bold"), command=lambda num=i: self.handle_digit_click(num))
             btn.place(relx=0.5, rely=0.3 + i * 0.07, anchor=CENTER)  # Increased vertical spacing to 0.07
             self.digit_buttons.append(btn)
-
-    def handle_digit_click(self, num):
-        print(f"User selected correction: {num}")
-        self.clear_canvas()
 
     def remove_correction_buttons(self):
         if self.correct_button:
@@ -110,15 +101,31 @@ class WhiteboardApp:
         if self.wrong_button:
             self.wrong_button.destroy()
             self.wrong_button = None
+    
+    def remove_digit_buttons(self):
         for btn in self.digit_buttons:
             btn.destroy()
         self.digit_buttons.clear()
 
-    def run(self):
-        self.root.mainloop()
+    def handle_correct(self):
+        self.remove_correction_buttons()
+        self.clear_canvas()
+
+    def handle_wrong(self):
+        self.remove_correction_buttons()
+        self.show_digit_buttons()
+
+    def handle_digit_click(self, num):
+        print(f"User selected correction: {num}")
+        self.remove_digit_buttons()
+        self.clear_canvas()
 
     def predict(self, event):
-        # self.image.save(f'{time.time()}.png')
+        # clear buttons (incase of multiple predictions before validation)
+        self.remove_digit_buttons()
+        self.remove_correction_buttons()
+
+        # predict
         predictions = self.nn.model.predict(ImageProcessor.matricize_images_to_mnist([self.image]))
         self.update_prediction(predictions[0].argmax(), predictions[0].max())
         self.show_correction_buttons()
