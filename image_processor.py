@@ -56,8 +56,6 @@ class ImageProcessor:
         return [Image.open(file) for file in png_files[:first_n]]
 
 
-# processor = ImageProcessor()
-# images = processor.get_png()
-# matrix = processor.matricize_images_to_mnist(images)
-# print(matrix.shape)  # Should print (28, 28)
-
+# images = ImageProcessor.get_png()
+# matrices = ImageProcessor.matricize_images_to_mnist(images)
+# print(matrices.shape)  # Should print (1, 28, 28) or (0,)

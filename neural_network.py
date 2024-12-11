@@ -41,7 +41,7 @@ class NeuralNetwork:
 
 
 
-if __file__ == "__main__":
+if __name__ == "__main__":
     
     # Load and preprocess the MNIST dataset
     (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
